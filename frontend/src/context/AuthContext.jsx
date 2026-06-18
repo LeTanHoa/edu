@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('token', res.data.token);
         localStorage.setItem('refreshToken', res.data.refreshToken);
         setUser(res.data.user);
-        
+
         // Fetch detailed profile
         const meRes = await api.get('/auth/me');
         setProfile(meRes.data.profile);
@@ -50,9 +50,9 @@ export const AuthProvider = ({ children }) => {
       return { success: false, message: res.data.message };
     } catch (error) {
       setLoading(false);
-      return { 
-        success: false, 
-        message: error.response?.data?.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại kết nối.' 
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại kết nối.'
       };
     }
   };
@@ -87,7 +87,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
-
+    localStorage.removeItem("hide_course_guide");
     setUser(null);
     setProfile(null);
   };

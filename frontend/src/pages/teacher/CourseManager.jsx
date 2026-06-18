@@ -67,6 +67,33 @@ const CourseManager = () => {
   const [questionPoints, setQuestionPoints] = useState(10);
   const [answers, setAnswers] = useState(defaultAnswers);
 
+  const [showGuide, setShowGuide] = useState(false);
+  const [dontShowAgain, setDontShowAgain] = useState(false);
+
+
+  useEffect(() => {
+    const hasSeenGuide = localStorage.getItem("course_guide_seen");
+
+    if (!hasSeenGuide) {
+      setShowGuide(true);
+      localStorage.setItem("course_guide_seen", "true");
+    }
+  }, []);
+  useEffect(() => {
+    const hideGuide = localStorage.getItem("hide_course_guide");
+
+    if (hideGuide !== "true") {
+      setShowGuide(true);
+    }
+  }, []);
+  const handleCloseGuide = () => {
+    if (dontShowAgain) {
+      localStorage.setItem("hide_course_guide", "true");
+    }
+
+    setShowGuide(false);
+  };
+
   const allLessons = useMemo(
     () => chapters.flatMap((chapter) => chapter.lessons.map((lesson) => ({ ...lesson, chapterTitle: chapter.title, chapterId: chapter._id }))),
     [chapters]
@@ -394,9 +421,33 @@ const CourseManager = () => {
                 <p className="text-xs text-slate-400 mt-1">{getCategoryName(activeCourse)} · Lớp {activeCourse.gradeLevel}</p>
                 <p className="text-xs text-slate-400 mt-1">{activeCourse.description}</p>
               </div>
-              <button onClick={handlePublishToggle} disabled={saving} className={`px-5 py-3 rounded-2xl text-xs font-black text-white ${activeCourse.isPublished ? 'bg-coral-500' : 'bg-forest-500'}`}>
+              {/* <button onClick={handlePublishToggle} disabled={saving} className={`px-5 py-3 rounded-2xl text-xs font-black text-white ${activeCourse.isPublished ? 'bg-coral-500' : 'bg-forest-500'}`}>
                 {activeCourse.isPublished ? 'Chuyển về bản nháp' : 'Xuất bản khóa học'}
-              </button>
+              </button> */}
+              <div className="flex gap-2">
+                <button
+                  className="px-4 py-3 rounded-2xl bg-blue-500 text-white text-xs font-black"
+                  onClick={() => {
+                    localStorage.removeItem("hide_course_guide");
+                    setShowGuide(true);
+                  }}
+                >
+                  Xem hướng dẫn
+                </button>
+
+                <button
+                  onClick={handlePublishToggle}
+                  disabled={saving}
+                  className={`px-5 py-3 rounded-2xl text-xs font-black text-white ${activeCourse.isPublished
+                    ? "bg-coral-500"
+                    : "bg-forest-500"
+                    }`}
+                >
+                  {activeCourse.isPublished
+                    ? "Chuyển về bản nháp"
+                    : "Xuất bản khóa học"}
+                </button>
+              </div>
             </section>
 
             <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -546,6 +597,132 @@ const CourseManager = () => {
           </>
         )}
       </main>
+      {showGuide && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white dark:bg-slate-800 max-w-3xl w-full rounded-3xl shadow-2xl overflow-hidden">
+
+            {/* Header */}
+            <div className="flex justify-between items-center p-5 border-b dark:border-slate-700">
+              <h2 className="text-xl font-black">
+                📚 Hướng dẫn tạo khóa học
+              </h2>
+
+              <button
+                onClick={handleCloseGuide}
+                className="text-slate-500 hover:text-red-500 text-xl font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 overflow-y-auto max-h-[65vh] text-sm space-y-6">
+
+              <section>
+                <h3 className="font-black text-primary-600 mb-2">
+                  Bước 1: Tạo khóa học
+                </h3>
+                <ul className="list-disc ml-5 space-y-1">
+                  <li>Nhập tên khóa học.</li>
+                  <li>Nhập mô tả khóa học.</li>
+                  <li>Chọn môn học.</li>
+                  <li>Chọn khối lớp.</li>
+                  <li>Nhấn <b>Tạo khóa học</b>.</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3 className="font-black text-primary-600 mb-2">
+                  Bước 2: Tạo chương học
+                </h3>
+                <ul className="list-disc ml-5 space-y-1">
+                  <li>Nhập tên chương học.</li>
+                  <li>Nhấn <b>Lưu chương</b>.</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3 className="font-black text-primary-600 mb-2">
+                  Bước 3: Thêm bài học
+                </h3>
+                <ul className="list-disc ml-5 space-y-1">
+                  <li>Chọn chương học.</li>
+                  <li>Nhập tên bài học.</li>
+                  <li>Chọn loại Video hoặc Văn bản.</li>
+                  <li>Nhập nội dung tương ứng.</li>
+                  <li>Nhấn <b>Lưu bài học</b>.</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3 className="font-black text-primary-600 mb-2">
+                  Bước 4: Tạo Quiz
+                </h3>
+                <ul className="list-disc ml-5 space-y-1">
+                  <li>Chọn bài học cần gắn quiz.</li>
+                  <li>Nhập tên quiz.</li>
+                  <li>Thiết lập thời gian làm bài.</li>
+                  <li>Thiết lập điểm đạt tối thiểu.</li>
+                  <li>Nhấn <b>Lưu quiz</b>.</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3 className="font-black text-primary-600 mb-2">
+                  Bước 5: Tạo câu hỏi
+                </h3>
+                <ul className="list-disc ml-5 space-y-1">
+                  <li>Chọn quiz vừa tạo.</li>
+                  <li>Nhập nội dung câu hỏi.</li>
+                  <li>Chọn loại câu hỏi.</li>
+                  <li>Nhập các đáp án.</li>
+                  <li>Đánh dấu đáp án đúng.</li>
+                  <li>Nhấn <b>Lưu câu hỏi</b>.</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3 className="font-black text-primary-600 mb-2">
+                  Bước 6: Xuất bản khóa học
+                </h3>
+                <ul className="list-disc ml-5 space-y-1">
+                  <li>Kiểm tra lại toàn bộ nội dung.</li>
+                  <li>Nhấn <b>Xuất bản khóa học</b>.</li>
+                  <li>Khóa học sẽ được duyệt trước khi hiển thị cho học sinh.</li>
+                </ul>
+              </section>
+
+            </div>
+
+            {/* Footer */}
+            <div className="border-t dark:border-slate-700 p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+
+              <label
+                htmlFor="dont-show-guide"
+                className="flex items-center gap-2 cursor-pointer text-sm text-slate-600 dark:text-slate-300"
+              >
+                <input
+                  id="dont-show-guide"
+                  type="checkbox"
+                  checked={dontShowAgain}
+                  onChange={(e) => setDontShowAgain(e.target.checked)}
+                  className="w-4 h-4"
+                />
+                Không hiển thị hướng dẫn này lần nữa
+              </label>
+
+              <button
+                onClick={handleCloseGuide}
+                className="px-5 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-black"
+              >
+                Đã hiểu
+              </button>
+
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 };
