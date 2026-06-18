@@ -3,6 +3,8 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { Search, Filter, BookOpen } from 'lucide-react';
 import api from '../../services/api';
 
+const COURSES_PER_PAGE = 6;
+
 const CourseList = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [courses, setCourses] = useState([]);
@@ -10,7 +12,14 @@ const CourseList = () => {
   const [keyword, setKeyword] = useState(searchParams.get('keyword') || '');
   const [selectedGrade, setSelectedGrade] = useState(searchParams.get('gradeLevel') || '');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
+  const [pagination, setPagination] = useState({ page: 1, limit: COURSES_PER_PAGE, total: 0, totalPages: 1 });
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setKeyword(searchParams.get('keyword') || '');
+    setSelectedGrade(searchParams.get('gradeLevel') || '');
+    setSelectedCategory(searchParams.get('category') || '');
+  }, [searchParams]);
 
   useEffect(() => {
     // Fetch categories
@@ -24,19 +33,40 @@ const CourseList = () => {
   }, []);
 
   useEffect(() => {
+    const categoryParam = searchParams.get('category') || '';
+    if (!categoryParam || categories.length === 0) return;
+
+    const categoryExists = categories.some((category) => category._id === categoryParam);
+    if (categoryExists) return;
+
+    const categoryBySlug = categories.find((category) => category.slug === categoryParam);
+    if (categoryBySlug) {
+      setSelectedCategory(categoryBySlug._id);
+    }
+  }, [categories, searchParams]);
+
+  useEffect(() => {
     setLoading(true);
     // Fetch courses based on search params
     const queryParams = {};
-    if (selectedGrade) queryParams.gradeLevel = selectedGrade;
-    if (selectedCategory) queryParams.category = selectedCategory;
-    if (keyword) queryParams.keyword = keyword;
+    const gradeLevel = searchParams.get('gradeLevel');
+    const category = searchParams.get('category');
+    const keywordParam = searchParams.get('keyword');
+    const page = searchParams.get('page') || '1';
+
+    if (gradeLevel) queryParams.gradeLevel = gradeLevel;
+    if (category) queryParams.category = category;
+    if (keywordParam) queryParams.keyword = keywordParam;
+    queryParams.page = page;
+    queryParams.limit = String(COURSES_PER_PAGE);
 
     const queryString = new URLSearchParams(queryParams).toString();
     
     api.get(`/courses?${queryString}`)
       .then(res => {
         if (res.data.success) {
-          setCourses(res.data.courses);
+          setCourses(res.data.courses || res.data.data || []);
+          setPagination(res.data.pagination || { page: Number(page), limit: COURSES_PER_PAGE, total: 0, totalPages: 1 });
         }
         setLoading(false);
       })
@@ -44,14 +74,16 @@ const CourseList = () => {
         console.error(err);
         setLoading(false);
       });
-  }, [searchParams, selectedGrade, selectedCategory]);
+  }, [searchParams]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     const currentParams = {};
-    if (keyword) currentParams.keyword = keyword;
+    const trimmedKeyword = keyword.trim();
+    if (trimmedKeyword) currentParams.keyword = trimmedKeyword;
     if (selectedGrade) currentParams.gradeLevel = selectedGrade;
     if (selectedCategory) currentParams.category = selectedCategory;
+    currentParams.page = '1';
     setSearchParams(currentParams);
   };
 
@@ -61,6 +93,23 @@ const CourseList = () => {
     setSelectedCategory('');
     setSearchParams({});
   };
+
+  const goToPage = (page) => {
+    const nextPage = Math.min(Math.max(page, 1), pagination.totalPages || 1);
+    const currentParams = Object.fromEntries(searchParams.entries());
+
+    if (nextPage === 1) {
+      delete currentParams.page;
+    } else {
+      currentParams.page = String(nextPage);
+    }
+
+    setSearchParams(currentParams);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const currentPage = pagination.page || Number(searchParams.get('page')) || 1;
+  const totalPages = pagination.totalPages || 1;
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12 pb-20">
@@ -152,38 +201,80 @@ const CourseList = () => {
           <p className="text-slate-400 font-bold max-w-sm">Hãy thử thay đổi từ khóa hoặc bộ lọc lớp học xem nhé!</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {courses?.map(course => (
-            <div key={course._id} className="card-playful flex flex-col h-full bg-white dark:bg-slate-800">
-              <div className="h-44 bg-primary-100 flex items-center justify-center text-5xl relative overflow-hidden border-b-4 border-slate-100 dark:border-slate-750">
-                {course.thumbnail ? (
-                  <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
-                ) : (
-                  <span>📚</span>
-                )}
-                <div className="absolute top-3 right-3 bg-sunny-400 border-2 border-white px-3 py-1 rounded-full text-xs font-black text-amber-900 shadow-sm">
-                  Lớp {course.gradeLevel}
+        <>
+          <div className="flex items-center justify-between gap-4 mb-6 text-sm font-bold text-slate-500 dark:text-slate-400">
+            <span>Hiển thị {courses.length} trong {pagination.total} khóa học</span>
+            <span>Trang {currentPage}/{totalPages}</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {courses?.map(course => (
+              <div key={course._id} className="card-playful flex flex-col h-full bg-white dark:bg-slate-800">
+                <div className="h-44 bg-primary-100 flex items-center justify-center text-5xl relative overflow-hidden border-b-4 border-slate-100 dark:border-slate-750">
+                  {course.thumbnail ? (
+                    <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
+                  ) : (
+                    <span>📚</span>
+                  )}
+                  <div className="absolute top-3 right-3 bg-sunny-400 border-2 border-white px-3 py-1 rounded-full text-xs font-black text-amber-900 shadow-sm">
+                    Lớp {course.gradeLevel}
+                  </div>
+                </div>
+                <div className="p-6 flex-1 flex flex-col justify-between">
+                  <div>
+                    <span className="text-xs font-black uppercase text-primary-500">{course.category?.name || 'Môn học'}</span>
+                    <h3 className="text-lg font-black mt-1 line-clamp-2">{course.title}</h3>
+                    <p className="text-slate-500 text-xs mt-2 font-semibold line-clamp-3">{course.description}</p>
+                  </div>
+                  <div className="flex items-center justify-between mt-6 pt-4 border-t-2 border-slate-50 dark:border-slate-750/50">
+                    <span className="text-xs font-bold text-slate-400">GV: {course.instructor?.fullName}</span>
+                    <Link 
+                      to={`/courses/${course._id}`} 
+                      className="px-4 py-2 bg-primary-500 text-white rounded-2xl text-xs font-bold hover:scale-105 active:translate-y-0.5 transition-all shadow-[0_3px_0_0_#0284c7]"
+                    >
+                      Xem chi tiết
+                    </Link>
+                  </div>
                 </div>
               </div>
-              <div className="p-6 flex-1 flex flex-col justify-between">
-                <div>
-                  <span className="text-xs font-black uppercase text-primary-500">{course.category?.name || 'Môn học'}</span>
-                  <h3 className="text-lg font-black mt-1 line-clamp-2">{course.title}</h3>
-                  <p className="text-slate-500 text-xs mt-2 font-semibold line-clamp-3">{course.description}</p>
-                </div>
-                <div className="flex items-center justify-between mt-6 pt-4 border-t-2 border-slate-50 dark:border-slate-750/50">
-                  <span className="text-xs font-bold text-slate-400">GV: {course.instructor?.fullName}</span>
-                  <Link 
-                    to={`/courses/${course._id}`} 
-                    className="px-4 py-2 bg-primary-500 text-white rounded-2xl text-xs font-bold hover:scale-105 active:translate-y-0.5 transition-all shadow-[0_3px_0_0_#0284c7]"
-                  >
-                    Xem chi tiết
-                  </Link>
-                </div>
-              </div>
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="flex flex-wrap items-center justify-center gap-2 mt-12">
+              <button
+                type="button"
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage <= 1}
+                className="px-4 py-2.5 rounded-2xl border-4 border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-black text-slate-500 disabled:opacity-40 disabled:cursor-not-allowed hover:text-primary-500"
+              >
+                Trước
+              </button>
+              {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+                <button
+                  key={page}
+                  type="button"
+                  onClick={() => goToPage(page)}
+                  className={`w-11 h-11 rounded-2xl text-sm font-black border-4 transition-all ${
+                    currentPage === page
+                      ? 'bg-primary-500 text-white border-primary-500 shadow-[0_4px_0_0_#0284c7]'
+                      : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-500 hover:text-primary-500'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage >= totalPages}
+                className="px-4 py-2.5 rounded-2xl border-4 border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-black text-slate-500 disabled:opacity-40 disabled:cursor-not-allowed hover:text-primary-500"
+              >
+                Sau
+              </button>
             </div>
-          ))}
-        </div>
+          )}
+        </>
       )}
 
     </div>

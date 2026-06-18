@@ -291,6 +291,7 @@ export const AdminLayout = () => {
   const adminLinks = [
     { to: '/admin', label: 'Tổng Quan', icon: <BarChart2 size={20} /> },
     { to: '/admin/users', label: t('usersManager'), icon: <Users size={20} /> },
+    { to: '/admin/feedback', label: 'Ý kiến phụ huynh', icon: <MessageSquare size={20} /> },
     { to: '/admin/settings', label: t('settings'), icon: <Settings size={20} /> },
     { to: '/admin/logs', label: t('auditLogs'), icon: <FileText size={20} /> },
   ];

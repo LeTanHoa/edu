@@ -36,6 +36,7 @@ import AdminDashboard from './pages/admin/Dashboard';
 import UserManager from './pages/admin/UserManager';
 import SystemSettings from './pages/admin/SystemSettings';
 import AuditLogs from './pages/admin/AuditLogs';
+import ParentFeedbackManager from './pages/admin/ParentFeedbackManager';
 
 // ──────────────────────────────────────────────────────────────
 // Route Guards
@@ -125,6 +126,7 @@ function AppRoutes() {
       }>
         <Route index element={<AdminDashboard />} />
         <Route path="users" element={<UserManager />} />
+        <Route path="feedback" element={<ParentFeedbackManager />} />
         <Route path="settings" element={<SystemSettings />} />
         <Route path="logs" element={<AuditLogs />} />
       </Route>
