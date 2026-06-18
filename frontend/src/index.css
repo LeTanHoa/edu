@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-sans antialiased text-slate-800 bg-sky-50/50 dark:bg-slate-900 dark:text-slate-100;
+  }
+
+  /* selection highlight — plain CSS (Tailwind v3 @apply doesn't support selection: variant) */
+  ::selection {
+    background-color: #bae6fd; /* primary-200 */
+    color: #075985;            /* primary-800 */
+  }
+}
+
+
+/* Kid-friendly Premium Styling Utility Classes */
+.card-playful {
+  @apply bg-white dark:bg-slate-800 rounded-3xl border-4 border-slate-100 dark:border-slate-700 shadow-[0_8px_0_0_#f1f5f9] dark:shadow-[0_8px_0_0_#334155] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_0_0_#e2e8f0] dark:hover:shadow-[0_12px_0_0_#475569] active:translate-y-1 active:shadow-[0_4px_0_0_#cbd5e1] overflow-hidden;
+}
+
+.card-sunny {
+  @apply bg-sunny-100 rounded-3xl border-4 border-sunny-400 shadow-[0_8px_0_0_#fef08a] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_0_0_#fef08a] active:translate-y-1 overflow-hidden;
+}
+
+.card-forest {
+  @apply bg-forest-100 rounded-3xl border-4 border-forest-500 shadow-[0_8px_0_0_#bbf7d0] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_0_0_#bbf7d0] active:translate-y-1 overflow-hidden;
+}
+
+.card-coral {
+  @apply bg-coral-100 rounded-3xl border-4 border-coral-500 shadow-[0_8px_0_0_#fecdd3] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_0_0_#fecdd3] active:translate-y-1 overflow-hidden;
+}
+
+.btn-bubble {
+  @apply px-6 py-3 font-extrabold text-white rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-[0_4px_0_0_rgba(0,0,0,0.15)] active:translate-y-0.5;
+}
+
+/* Fun Bubble background animation */
+.bubble-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.bubble-bg::before {
+  content: '';
+  position: absolute;
+  top: -10%;
+  left: -10%;
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(14,165,233,0.1) 0%, rgba(14,165,233,0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.bubble-bg::after {
+  content: '';
+  position: absolute;
+  bottom: -10%;
+  right: -10%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(234,179,8,0.1) 0%, rgba(234,179,8,0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-sky-50 dark:bg-slate-800 rounded-full;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-sky-200 dark:bg-slate-600 rounded-full hover:bg-sky-300 dark:hover:bg-slate-500 transition-colors;
+}
