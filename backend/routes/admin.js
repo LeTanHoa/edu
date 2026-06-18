@@ -1,5 +1,5 @@
 import express from 'express';
-import { User, Student, Teacher, Course, Enrollment, Grade, Log, Setting, Category, Submission, Assignment } from '../models/index.js';
+import { User, Student, Teacher, Course, Enrollment, Grade, Log, Setting, Category, Submission, Assignment, ParentFeedback } from '../models/index.js';
 import { protect, authorize } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -191,6 +191,80 @@ router.delete('/categories/:id', protect, authorize('admin'), async (req, res) =
     res.json({ success: true, message: 'Đã xóa môn học' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Lỗi xóa môn học' });
+  }
+});
+
+// ================= PARENT FEEDBACK MANAGEMENT =================
+
+router.get('/feedback', protect, authorize('admin'), async (req, res) => {
+  try {
+    const { status, keyword } = req.query;
+    const query = {};
+
+    if (status) query.status = status;
+    if (keyword) {
+      query.$or = [
+        { parentName: { $regex: keyword, $options: 'i' } },
+        { studentName: { $regex: keyword, $options: 'i' } },
+        { email: { $regex: keyword, $options: 'i' } },
+        { message: { $regex: keyword, $options: 'i' } }
+      ];
+    }
+
+    const feedback = await ParentFeedback.find(query).sort('-createdAt');
+    const stats = {
+      total: await ParentFeedback.countDocuments(),
+      new: await ParentFeedback.countDocuments({ status: 'new' }),
+      reviewed: await ParentFeedback.countDocuments({ status: 'reviewed' }),
+      archived: await ParentFeedback.countDocuments({ status: 'archived' })
+    };
+
+    res.json({ success: true, feedback, stats });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Lỗi tải danh sách ý kiến phụ huynh' });
+  }
+});
+
+router.put('/feedback/:id', protect, authorize('admin'), async (req, res) => {
+  try {
+    const feedback = await ParentFeedback.findById(req.params.id);
+    if (!feedback) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy ý kiến' });
+    }
+
+    const { status, adminNote } = req.body;
+    if (status !== undefined) feedback.status = status;
+    if (adminNote !== undefined) feedback.adminNote = adminNote;
+
+    await feedback.save();
+    await Log.create({
+      user: req.user._id,
+      action: 'ADMIN_UPDATE_FEEDBACK',
+      details: `Cập nhật ý kiến phụ huynh: ${feedback.parentName}`
+    });
+
+    res.json({ success: true, feedback, message: 'Đã cập nhật ý kiến phụ huynh' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Lỗi cập nhật ý kiến phụ huynh' });
+  }
+});
+
+router.delete('/feedback/:id', protect, authorize('admin'), async (req, res) => {
+  try {
+    const feedback = await ParentFeedback.findByIdAndDelete(req.params.id);
+    if (!feedback) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy ý kiến' });
+    }
+
+    await Log.create({
+      user: req.user._id,
+      action: 'ADMIN_DELETE_FEEDBACK',
+      details: `Xóa ý kiến phụ huynh: ${feedback.parentName}`
+    });
+
+    res.json({ success: true, message: 'Đã xóa ý kiến phụ huynh' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Lỗi xóa ý kiến phụ huynh' });
   }
 });
 

@@ -22,6 +22,7 @@ import Certificate from './Certificate.js';
 import Banner from './Banner.js';
 import Log from './Log.js';
 import Setting from './Setting.js';
+import ParentFeedback from './ParentFeedback.js';
 
 export {
   User,
@@ -47,5 +48,6 @@ export {
   Certificate,
   Banner,
   Log,
-  Setting
+  Setting,
+  ParentFeedback
 };

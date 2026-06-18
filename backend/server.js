@@ -17,6 +17,7 @@ import adminRouter from './routes/admin.js';
 import notificationsRouter from './routes/notifications.js';
 import certificatesRouter from './routes/certificates.js';
 import bannersRouter from './routes/banners.js';
+import feedbackRouter from './routes/feedback.js';
 
 dotenv.config();
 
@@ -101,6 +102,7 @@ app.use('/api/admin', adminRouter);
 app.use('/api/notifications', notificationsRouter);
 app.use('/api/certificates', certificatesRouter);
 app.use('/api/banners', bannersRouter);
+app.use('/api/feedback', feedbackRouter);
 
 // Fallback test route
 app.get('/api/health', (req, res) => {

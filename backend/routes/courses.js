@@ -29,10 +29,56 @@ const issueCertificateIfNeeded = async (studentId, courseId) => {
 
 const router = express.Router();
 
+const buildPublicCourseQuery = async ({ gradeLevel, category, keyword }) => {
+  const query = { isPublished: true, isApproved: true };
+
+  if (gradeLevel) {
+    const parsedGrade = Number(gradeLevel);
+    if (!Number.isNaN(parsedGrade)) query.gradeLevel = parsedGrade;
+  }
+
+  if (category) {
+    if (category.match(/^[0-9a-fA-F]{24}$/)) {
+      query.category = category;
+    } else {
+      const matchedCategory = await Category.findOne({ slug: category });
+      query.category = matchedCategory?._id || null;
+    }
+  }
+
+  if (keyword?.trim()) {
+    query.$or = [
+      { title: { $regex: keyword.trim(), $options: 'i' } },
+      { description: { $regex: keyword.trim(), $options: 'i' } }
+    ];
+  }
+
+  return query;
+};
+
 router.get('/', async (req, res) => {
   try {
-    const courses = await Course.find({});
-    res.json({ success: true, data:courses });
+    const query = await buildPublicCourseQuery(req.query);
+    const page = Math.max(Number(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(Number(req.query.limit) || 0, 0), 30);
+    const skip = limit ? (page - 1) * limit : 0;
+    const total = await Course.countDocuments(query);
+    const courseQuery = Course.find(query)
+      .populate('instructor', 'fullName avatar')
+      .populate('category')
+      .sort('-createdAt');
+
+    if (limit) courseQuery.skip(skip).limit(limit);
+
+    const courses = await courseQuery;
+    const pagination = {
+      page,
+      limit: limit || total,
+      total,
+      totalPages: limit ? Math.max(Math.ceil(total / limit), 1) : 1
+    };
+
+    res.json({ success: true, courses, data: courses, pagination });
   } catch (error) {
     console.error(error); 
     res.status(500).json({
@@ -124,17 +170,13 @@ router.put('/:id/status', protect, authorize('teacher', 'admin'), async (req, re
 // Search and filter courses
 router.get('/search', async (req, res) => {
   try {
-    const { gradeLevel, category, keyword } = req.query;
-    let query = { isPublished: true, isApproved: true };
+    const query = await buildPublicCourseQuery(req.query);
+    const courses = await Course.find(query)
+      .populate('instructor', 'fullName avatar')
+      .populate('category')
+      .sort('-createdAt');
 
-    if (gradeLevel) query.gradeLevel = Number(gradeLevel);
-    if (category) query.category = category;
-    if (keyword) {
-      query.title = { $regex: keyword, $options: 'i' };
-    }
-
-    const courses = await Course.find(query).populate('instructor', 'fullName avatar').populate('category');
-    res.json({ success: true, courses });
+    res.json({ success: true, courses, data: courses });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Lỗi tải danh sách khóa học' });
   }
