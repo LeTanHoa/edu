@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import toast from 'react-hot-toast';
 import { Clock, HelpCircle, ArrowRight, ArrowLeft, CheckCircle, Award, AlertTriangle } from 'lucide-react';
 import api from '../../services/api';
 
@@ -119,7 +120,7 @@ const QuizEngine = () => {
   };
 
   const autoSubmit = () => {
-    alert('⏰ Hết giờ làm bài! Hệ thống đang tự động nộp bài của bé.');
+    toast('⏰ Hết giờ làm bài! Hệ thống đang tự động nộp bài của bé.', { icon: '⏰' });
     submitQuiz();
   };
 
@@ -135,7 +136,7 @@ const QuizEngine = () => {
         refreshProfile();
       }
     } catch (error) {
-      alert('Không thể nộp bài kiểm tra!');
+      toast.error('Không thể nộp bài kiểm tra!');
     }
     setSubmitting(false);
   };

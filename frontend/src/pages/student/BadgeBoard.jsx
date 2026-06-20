@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import toast from 'react-hot-toast';
 import { Award, Trophy, Star } from 'lucide-react';
 import api from '../../services/api';
 
@@ -29,11 +30,11 @@ const BadgeBoard = () => {
     try {
       const res = await api.post('/gamification/badges/claim', { badgeId });
       if (res.data.success) {
-        alert(`🎉 Chúc mừng em đã nhận thành công huy hiệu "${badgeName}"!`);
+        toast.success(`🎉 Chúc mừng em đã nhận thành công huy hiệu "${badgeName}"!`);
         refreshProfile();
       }
     } catch (error) {
-      alert(error.response?.data?.message || 'Có lỗi xảy ra khi đổi huy hiệu!');
+      toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi đổi huy hiệu!');
     }
     setClaiming({ ...claiming, [badgeId]: false });
   };

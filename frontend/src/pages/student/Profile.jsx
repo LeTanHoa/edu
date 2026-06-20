@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import toast from 'react-hot-toast';
 import { User, Award, CheckCircle, Printer, Download } from 'lucide-react';
 import api from '../../services/api';
 
@@ -41,11 +42,11 @@ const StudentProfile = () => {
         className
       });
       if (res.data.success) {
-        alert(res.data.message);
+        toast.success(res.data.message);
         refreshProfile();
       }
     } catch (error) {
-      alert('Không thể cập nhật thông tin cá nhân!');
+      toast.error('Không thể cập nhật thông tin cá nhân!');
     }
     setUpdating(false);
   };
@@ -62,11 +63,11 @@ const StudentProfile = () => {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       if (res.data.success) {
-        alert(res.data.message);
-        window.location.reload(); // Refresh to reload avatar image
+        toast.success(res.data.message);
+        refreshProfile();
       }
     } catch (error) {
-      alert('Không thể tải lên ảnh đại diện!');
+      toast.error('Không thể tải lên ảnh đại diện!');
     }
   };
 

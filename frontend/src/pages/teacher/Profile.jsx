@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import toast from 'react-hot-toast';
 import { User, Book, Sparkles, Upload } from 'lucide-react';
 import api from '../../services/api';
 
@@ -30,11 +31,11 @@ const TeacherProfile = () => {
         bio
       });
       if (res.data.success) {
-        alert(res.data.message);
+        toast.success(res.data.message);
         refreshProfile();
       }
     } catch (error) {
-      alert('Không thể cập nhật hồ sơ cá nhân!');
+      toast.error('Không thể cập nhật hồ sơ cá nhân!');
     }
     setUpdating(false);
   };
@@ -51,11 +52,11 @@ const TeacherProfile = () => {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       if (res.data.success) {
-        alert(res.data.message);
-        window.location.reload();
+        toast.success(res.data.message);
+        refreshProfile();
       }
     } catch (error) {
-      alert('Lỗi tải ảnh đại diện!');
+      toast.error('Lỗi tải ảnh đại diện!');
     }
   };
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import toast from 'react-hot-toast';
 import { FileText, ClipboardCheck, ArrowRight, User } from 'lucide-react';
 import api from '../../services/api';
 
@@ -64,7 +65,7 @@ const GradingPortal = () => {
     e.preventDefault();
     if (!activeSubmission || saving) return;
     if (grade === '') {
-      alert('Vui lòng nhập điểm số!');
+      toast.error('Vui lòng nhập điểm số!');
       return;
     }
 
@@ -76,13 +77,13 @@ const GradingPortal = () => {
       });
 
       if (res.data.success) {
-        alert('Lưu điểm số bài tập thành công!');
+        toast.success('Lưu điểm số bài tập thành công!');
         setGrade('');
         setFeedback('');
         loadSubmissions();
       }
     } catch (error) {
-      alert(error.response?.data?.message || 'Có lỗi xảy ra khi chấm điểm!');
+      toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi chấm điểm!');
     }
     setSaving(false);
   };

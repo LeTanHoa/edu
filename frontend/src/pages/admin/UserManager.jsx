@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, ShieldAlert, Lock, Unlock, Key } from 'lucide-react';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 
 const UserManager = () => {
@@ -54,7 +55,7 @@ const UserManager = () => {
         gradeLevel: Number(newGrade)
       });
       if (res.data.success) {
-        alert('Tạo người dùng mới thành công!');
+        toast.success('Tạo người dùng mới thành công!');
         setNewUsername('');
         setNewEmail('');
         setNewFullName('');
@@ -63,7 +64,7 @@ const UserManager = () => {
         loadUsers();
       }
     } catch (error) {
-      alert(error.response?.data?.message || 'Lỗi khi tạo người dùng!');
+      toast.error(error.response?.data?.message || 'Lỗi khi tạo người dùng!');
     }
   };
 
@@ -71,11 +72,11 @@ const UserManager = () => {
     try {
       const res = await api.post(`/admin/users/${userId}/toggle-status`);
       if (res.data.success) {
-        alert(res.data.message);
+        toast.success(res.data.message);
         loadUsers();
       }
     } catch (error) {
-      alert(error.response?.data?.message || 'Lỗi cập nhật trạng thái!');
+      toast.error(error.response?.data?.message || 'Lỗi cập nhật trạng thái!');
     }
   };
 
@@ -86,10 +87,10 @@ const UserManager = () => {
     try {
       const res = await api.post(`/admin/users/${userId}/reset-password`, { newPassword: pwd });
       if (res.data.success) {
-        alert(res.data.message);
+        toast.success(res.data.message);
       }
     } catch (error) {
-      alert('Không thể đặt lại mật khẩu!');
+      toast.error('Không thể đặt lại mật khẩu!');
     }
   };
 

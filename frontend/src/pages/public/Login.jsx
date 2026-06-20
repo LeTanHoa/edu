@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import toast from 'react-hot-toast';
 import { Sparkles } from 'lucide-react';
 
 const Login = () => {
@@ -18,18 +19,19 @@ const Login = () => {
 
     if (!username || !password) {
       setError('Vui lòng điền đầy đủ tên đăng nhập và mật khẩu!');
+      toast.error('Vui lòng điền đầy đủ tên đăng nhập và mật khẩu!');
       setLoading(false);
       return;
     }
 
     const res = await login(username, password);
     if (res.success) {
-
-
+      toast.success('Đăng nhập thành công! Chào mừng bé 🎉');
       // Navigate based on user role
       navigate(`/${res.user.role}`);
     } else {
       setError(res.message || 'Tên đăng nhập hoặc mật khẩu không chính xác!');
+      toast.error(res.message || 'Đăng nhập thất bại, đang bị lỗi!');
     }
     setLoading(false);
   };

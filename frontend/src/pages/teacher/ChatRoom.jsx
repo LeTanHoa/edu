@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import toast from 'react-hot-toast';
 import { Send, MessageSquare } from 'lucide-react';
 import api from '../../services/api';
 
@@ -66,7 +67,7 @@ const ChatRoom = () => {
         setTypedMessage('');
       }
     } catch (error) {
-      alert('Không thể gửi tin nhắn!');
+      toast.error('Không thể gửi tin nhắn!');
     }
   };
 

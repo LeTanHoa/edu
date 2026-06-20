@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Plus, BookOpen, Video, FileText, ClipboardList, HelpCircle, Send } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 
 const emptyCourse = {
@@ -133,7 +134,7 @@ const CourseManager = () => {
       setActiveCourse(nextCourses[0] || null);
       setCourseForm((prev) => ({ ...prev, category: nextCategories[0]?._id || '' }));
     } catch (error) {
-      alert(error.response?.data?.message || 'Không thể tải dữ liệu quản lý khóa học.');
+      toast.error(error.response?.data?.message || 'Không thể tải dữ liệu quản lý khóa học.');
     } finally {
       setLoading(false);
     }
@@ -179,13 +180,14 @@ const CourseManager = () => {
         gradeLevel: Number(courseForm.gradeLevel)
       });
       if (res.data.success) {
+        toast.success('Tạo khóa học mới thành công!');
         const nextCourses = [res.data.course, ...courses];
         setCourses(nextCourses);
         setActiveCourse(res.data.course);
         setCourseForm({ ...emptyCourse, category: categories[0]?._id || '' });
       }
     } catch (error) {
-      alert(error.response?.data?.message || 'Không thể tạo khóa học.');
+      toast.error(error.response?.data?.message || 'Không thể tạo khóa học.');
     } finally {
       setSaving(false);
     }
@@ -200,10 +202,11 @@ const CourseManager = () => {
         title: chapterTitle,
         order: chapters.length + 1
       });
+      toast.success('Tạo chương học thành công!');
       setChapterTitle('');
       await loadCourseContent(activeCourse._id);
     } catch (error) {
-      alert(error.response?.data?.message || 'Không thể tạo chương học.');
+      toast.error(error.response?.data?.message || 'Không thể tạo chương học.');
     } finally {
       setSaving(false);
     }
@@ -222,10 +225,11 @@ const CourseManager = () => {
         duration: Number(lessonForm.duration) * 60,
         order: allLessons.length + 1
       });
+      toast.success('Tạo bài học thành công!');
       setLessonForm({ ...emptyLesson, chapterId: lessonForm.chapterId });
       await loadCourseContent(activeCourse._id);
     } catch (error) {
-      alert(error.response?.data?.message || 'Không thể tạo bài học.');
+      toast.error(error.response?.data?.message || 'Không thể tạo bài học.');
     } finally {
       setSaving(false);
     }
@@ -240,10 +244,11 @@ const CourseManager = () => {
         ...assignmentForm,
         maxPoints: Number(assignmentForm.maxPoints)
       });
+      toast.success('Tạo bài tập thành công!');
       setAssignmentForm({ ...emptyAssignment, chapterId: assignmentForm.chapterId });
       await loadCourseContent(activeCourse._id);
     } catch (error) {
-      alert(error.response?.data?.message || 'Không thể tạo bài tập.');
+      toast.error(error.response?.data?.message || 'Không thể tạo bài tập.');
     } finally {
       setSaving(false);
     }
@@ -263,11 +268,12 @@ const CourseManager = () => {
         passingScore: Number(quizForm.passingScore)
       });
       if (res.data.success) {
+        toast.success('Tạo quiz bài học thành công!');
         setActiveQuizId(res.data.quiz._id);
         await loadCourseContent(activeCourse._id);
       }
     } catch (error) {
-      alert(error.response?.data?.message || 'Không thể tạo quiz.');
+      toast.error(error.response?.data?.message || 'Không thể tạo quiz.');
     } finally {
       setSaving(false);
     }
@@ -282,7 +288,7 @@ const CourseManager = () => {
       .filter((answer) => answer.text.trim());
 
     if (cleanedAnswers.length === 0) {
-      alert('Cần ít nhất một đáp án.');
+      toast.error('Cần ít nhất một đáp án.');
       return;
     }
 
@@ -294,13 +300,14 @@ const CourseManager = () => {
         points: Number(questionPoints),
         answers: cleanedAnswers
       });
+      toast.success('Thêm câu hỏi vào quiz thành công!');
       setQuestionText('');
       setQuestionType('single');
       setQuestionPoints(10);
       setAnswers(defaultAnswers);
       await loadCourseContent(activeCourse._id);
     } catch (error) {
-      alert(error.response?.data?.message || 'Không thể tạo câu hỏi.');
+      toast.error(error.response?.data?.message || 'Không thể tạo câu hỏi.');
     } finally {
       setSaving(false);
     }
@@ -315,11 +322,12 @@ const CourseManager = () => {
       const res = await api.put(`/courses/${activeCourse._id}/status`, payload);
       if (res.data.success) {
         const updated = res.data.course;
+        toast.success(updated.isPublished ? 'Đã xuất bản khóa học thành công!' : 'Đã chuyển khóa học về bản nháp.');
         setActiveCourse(updated);
         setCourses(courses.map((course) => (course._id === updated._id ? updated : course)));
       }
     } catch (error) {
-      alert(error.response?.data?.message || 'Không thể cập nhật trạng thái khóa học.');
+      toast.error(error.response?.data?.message || 'Không thể cập nhật trạng thái khóa học.');
     } finally {
       setSaving(false);
     }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import toast from 'react-hot-toast';
 import { 
   BookOpen, ChevronRight, FileText, CheckCircle, HelpCircle, 
   MessageSquare, Send, Upload, Award, PlayCircle 
@@ -98,13 +99,13 @@ const CourseViewer = () => {
     try {
       const res = await api.post(`/courses/lessons/${currentLesson._id}/complete`);
       if (res.data.success) {
-        alert(`🎉 Chúc mừng em đã hoàn thành bài học! Cập nhật tiến độ: ${res.data.progress}%`);
+        toast.success(`🎉 Chúc mừng em đã hoàn thành bài học! Cập nhật tiến độ: ${res.data.progress}%`);
         refreshProfile();
         // Reload course data to show updated checkmarks
         loadCourseDetails();
       }
     } catch (error) {
-      alert(error.response?.data?.message || 'Có lỗi xảy ra!');
+      toast.error(error.response?.data?.message || 'Có lỗi xảy ra!');
     }
     setCompleting(false);
   };
@@ -118,11 +119,12 @@ const CourseViewer = () => {
         content: newComment
       });
       if (res.data.success) {
+        toast.success('Đã gửi câu hỏi hỏi đáp bài học!');
         setComments([res.data.comment, ...comments]);
         setNewComment('');
       }
     } catch (error) {
-      alert('Không thể đăng bình luận!');
+      toast.error('Không thể đăng bình luận!');
     }
   };
 
@@ -142,12 +144,12 @@ const CourseViewer = () => {
       });
 
       if (res.data.success) {
-        alert(res.data.message);
+        toast.success(res.data.message);
         setHomeworkText('');
         setSelectedFile(null);
       }
     } catch (error) {
-      alert(error.response?.data?.message || 'Lỗi nộp bài tập!');
+      toast.error(error.response?.data?.message || 'Lỗi nộp bài tập!');
     }
     setUploadingHomework({ ...uploadingHomework, [assignmentId]: false });
   };

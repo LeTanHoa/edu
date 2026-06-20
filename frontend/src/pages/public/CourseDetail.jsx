@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import toast from 'react-hot-toast';
 import { BookOpen, GraduationCap, CheckCircle, Award, Play } from 'lucide-react';
 import api from '../../services/api';
 
@@ -29,12 +30,12 @@ const CourseDetail = () => {
 
   const handleEnroll = async () => {
     if (!user) {
-      alert('Vui lòng đăng nhập tài khoản học sinh để đăng ký học nhé!');
+      toast.error('Vui lòng đăng nhập tài khoản học sinh để đăng ký học nhé!');
       navigate('/login');
       return;
     }
     if (user.role !== 'student') {
-      alert('Tài khoản của bạn không phải là học sinh để đăng ký học!');
+      toast.error('Tài khoản của bạn không phải là học sinh để đăng ký học!');
       return;
     }
 
@@ -42,10 +43,10 @@ const CourseDetail = () => {
     try {
       const res = await api.post(`/courses/${id}/enroll`);
       if (res.data.success) {
-        alert(res.data.message);
+        toast.success(res.data.message);
       }
     } catch (error) {
-      alert(error.response?.data?.message || 'Có lỗi xảy ra khi đăng ký!');
+      toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi đăng ký!');
     }
     setEnrolling(false);
   };

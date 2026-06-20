@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { MessageSquareText, RefreshCw, Search, Star, Trash2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 
 const STATUS_LABELS = {
@@ -35,7 +36,7 @@ const ParentFeedbackManager = () => {
         setStats(res.data.stats);
       }
     } catch (error) {
-      alert(error.response?.data?.message || 'Không thể tải ý kiến phụ huynh');
+      toast.error(error.response?.data?.message || 'Không thể tải ý kiến phụ huynh');
     } finally {
       setLoading(false);
     }
@@ -65,11 +66,12 @@ const ParentFeedbackManager = () => {
       });
 
       if (res.data.success) {
+        toast.success('Cập nhật ý kiến thành công!');
         updateLocalFeedback(item._id, res.data.feedback);
         loadFeedback();
       }
     } catch (error) {
-      alert(error.response?.data?.message || 'Không thể cập nhật ý kiến');
+      toast.error(error.response?.data?.message || 'Không thể cập nhật ý kiến');
     } finally {
       setSavingId('');
     }
@@ -81,11 +83,12 @@ const ParentFeedbackManager = () => {
     try {
       const res = await api.delete(`/admin/feedback/${feedbackId}`);
       if (res.data.success) {
+        toast.success('Xóa ý kiến thành công!');
         setFeedback((items) => items.filter((item) => item._id !== feedbackId));
         loadFeedback();
       }
     } catch (error) {
-      alert(error.response?.data?.message || 'Không thể xóa ý kiến');
+      toast.error(error.response?.data?.message || 'Không thể xóa ý kiến');
     }
   };
 

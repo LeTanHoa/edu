@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import toast from 'react-hot-toast';
 import { Save, Mail, Globe, BookOpen, Trash2 } from 'lucide-react';
 import api from '../../services/api';
 
@@ -66,10 +67,10 @@ const SystemSettings = () => {
         }
       });
       if (res.data.success) {
-        alert(res.data.message);
+        toast.success(res.data.message);
       }
     } catch (error) {
-      alert('Không thể lưu cấu hình hệ thống!');
+      toast.error('Không thể lưu cấu hình hệ thống!');
     }
     setSaving(false);
   };
@@ -85,7 +86,7 @@ const SystemSettings = () => {
 
   const handleSaveCategory = async () => {
     if (!categoryForm.name.trim()) {
-      alert('Vui lòng nhập tên môn học!');
+      toast.error('Vui lòng nhập tên môn học!');
       return;
     }
     setSaving(true);
@@ -99,11 +100,12 @@ const SystemSettings = () => {
         : await api.post('/admin/categories', payload);
 
       if (res.data.success) {
+        toast.success(editingCategoryId ? 'Cập nhật môn học thành công!' : 'Tạo môn học mới thành công!');
         resetCategoryForm();
         await loadCategories();
       }
     } catch (error) {
-      alert(error.response?.data?.message || 'Không thể lưu môn học!');
+      toast.error(error.response?.data?.message || 'Không thể lưu môn học!');
     }
     setSaving(false);
   };
@@ -123,11 +125,12 @@ const SystemSettings = () => {
     try {
       const res = await api.delete(`/admin/categories/${categoryId}`);
       if (res.data.success) {
+        toast.success('Xóa môn học thành công!');
         await loadCategories();
         if (editingCategoryId === categoryId) resetCategoryForm();
       }
     } catch (error) {
-      alert(error.response?.data?.message || 'Không thể xóa môn học!');
+      toast.error(error.response?.data?.message || 'Không thể xóa môn học!');
     }
     setSaving(false);
   };

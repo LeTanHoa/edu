@@ -1,11 +1,12 @@
 import React from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 import { useTheme } from '../context/ThemeContext';
 import { useLang } from '../context/LangContext';
-import { 
-  BookOpen, Trophy, Award, MessageSquare, LogOut, Sun, Moon, 
-  Globe, User, Settings, Home, BarChart2, Book, FileText, CheckSquare, Users 
+import {
+  BookOpen, Trophy, Award, MessageSquare, LogOut, Sun, Moon,
+  Globe, User, Settings, Home, BarChart2, Book, FileText, CheckSquare, Users
 } from 'lucide-react';
 import api from '../services/api';
 
@@ -39,8 +40,8 @@ export const MainLayout = () => {
 
           <div className="flex items-center gap-4">
             {/* Language Switch */}
-            <button 
-              onClick={toggleLang} 
+            <button
+              onClick={toggleLang}
               className="p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-700 hover:scale-105 active:scale-95 transition-all text-sm font-bold flex items-center gap-1.5"
             >
               <Globe size={18} />
@@ -48,8 +49,8 @@ export const MainLayout = () => {
             </button>
 
             {/* Theme Toggle */}
-            <button 
-              onClick={toggleTheme} 
+            <button
+              onClick={toggleTheme}
               className="p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-700 hover:scale-105 active:scale-95 transition-all"
             >
               {darkMode ? <Sun size={18} className="text-sunny-500" /> : <Moon size={18} className="text-slate-600" />}
@@ -63,7 +64,7 @@ export const MainLayout = () => {
                 >
                   Dashboard
                 </button>
-                <button 
+                <button
                   onClick={() => { logout(); navigate('/'); }}
                   className="p-2.5 rounded-2xl text-slate-500 hover:text-coral-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all"
                   title={t('logout')}
@@ -73,14 +74,14 @@ export const MainLayout = () => {
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <Link 
-                  to="/login" 
+                <Link
+                  to="/login"
                   className="px-5 py-2.5 border-4 border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-2xl font-extrabold transition-all hover:scale-105 active:translate-y-0.5"
                 >
                   {t('login')}
                 </Link>
-                <Link 
-                  to="/register" 
+                <Link
+                  to="/register"
                   className="px-5 py-2.5 bg-sunny-500 hover:bg-sunny-600 text-white rounded-2xl font-extrabold shadow-[0_4px_0_0_#d97706] transition-all hover:scale-105 active:translate-y-0.5 active:shadow-none"
                 >
                   {t('register')}
@@ -119,10 +120,10 @@ const SidebarLayout = ({ sidebarLinks, roleName }) => {
     if (user?.role !== 'student') return;
     try {
       const res = await api.post('/gamification/daily-checkin');
-      alert(res.data.message);
+      toast.success(res.data.message);
       refreshProfile();
     } catch (error) {
-      alert(error.response?.data?.message || 'Không thể điểm danh!');
+      toast.error(error.response?.data?.message || 'Không thể điểm danh!');
     }
   };
 
@@ -130,23 +131,24 @@ const SidebarLayout = ({ sidebarLinks, roleName }) => {
     <div className="min-h-screen flex flex-col md:flex-row bg-sky-50/30 dark:bg-slate-950 transition-colors duration-300">
       {/* Sidebar navigation */}
       <aside className="w-full md:w-64 bg-white dark:bg-slate-900 border-b-4 md:border-b-0 md:border-r-4 border-slate-100 dark:border-slate-800 flex flex-col p-6">
-        <div className="flex items-center gap-2 mb-8">
-          <span className="text-3xl">🚀</span>
-          <span className="text-2xl font-black tracking-wider bg-gradient-to-r from-primary-500 to-playful-purple bg-clip-text text-transparent font-comic">
-            EDUKIDS
-          </span>
-          <span className="text-[10px] uppercase font-extrabold bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-500">
-            {roleName}
-          </span>
-        </div>
+        <Link to='/'>
+          <div className="flex items-center gap-2 mb-8">
+            <span className="text-3xl">🚀</span>
+            <span className="text-2xl font-black tracking-wider bg-gradient-to-r from-primary-500 to-playful-purple bg-clip-text text-transparent font-comic">
+              EDUKIDS
+            </span>
+            <span className="text-[10px] uppercase font-extrabold bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-500">
+              {roleName}
+            </span>
+          </div></Link>
 
         {/* User Mini Profile */}
         {user && (
           <div className="mb-8 p-4 bg-sky-50/50 dark:bg-slate-800/50 rounded-2xl border-2 border-slate-100 dark:border-slate-700/50 flex items-center gap-3">
             <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-primary-400 bg-white">
-              <img 
-                src={user.avatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=${user.username}`} 
-                alt="Avatar" 
+              <img
+                src={user.avatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=${user.username}`}
+                alt="Avatar"
                 className="w-full h-full object-cover"
               />
             </div>
@@ -169,11 +171,10 @@ const SidebarLayout = ({ sidebarLinks, roleName }) => {
               <Link
                 key={link.to}
                 to={link.to}
-                className={`flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all ${
-                  isActive 
-                    ? 'bg-primary-500 text-white shadow-[0_4px_0_0_#0284c7] scale-102' 
-                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
-                }`}
+                className={`flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all ${isActive
+                  ? 'bg-primary-500 text-white shadow-[0_4px_0_0_#0284c7] scale-102'
+                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                  }`}
               >
                 {link.icon}
                 <span>{link.label}</span>
@@ -199,7 +200,7 @@ const SidebarLayout = ({ sidebarLinks, roleName }) => {
           {user?.role === 'student' && profile ? (
             <div className="flex items-center gap-6 flex-wrap">
               {/* Daily checkin */}
-              <button 
+              <button
                 onClick={handleDailyCheckin}
                 className="flex items-center gap-2 px-4 py-1.5 bg-sunny-100 dark:bg-sunny-950/20 border-2 border-sunny-400 text-sunny-700 dark:text-sunny-300 rounded-full text-sm font-extrabold hover:scale-105 transition-all"
               >
@@ -217,8 +218,8 @@ const SidebarLayout = ({ sidebarLinks, roleName }) => {
               <div className="flex items-center gap-3">
                 <span className="text-sm font-extrabold text-primary-500">✨ {profile.xp} XP</span>
                 <div className="w-32 bg-slate-100 dark:bg-slate-700 h-3 rounded-full overflow-hidden border">
-                  <div 
-                    className="bg-primary-500 h-full transition-all duration-500" 
+                  <div
+                    className="bg-primary-500 h-full transition-all duration-500"
                     style={{ width: `${profile.xp % 100}%` }}
                   />
                 </div>
@@ -231,15 +232,15 @@ const SidebarLayout = ({ sidebarLinks, roleName }) => {
           )}
 
           <div className="flex items-center gap-3">
-            <button 
-              onClick={toggleLang} 
+            <button
+              onClick={toggleLang}
               className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800 hover:scale-105 text-sm font-bold flex items-center gap-1.5 border border-slate-200 dark:border-slate-700"
             >
               <Globe size={18} />
               <span>{lang.toUpperCase()}</span>
             </button>
-            <button 
-              onClick={toggleTheme} 
+            <button
+              onClick={toggleTheme}
               className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800 hover:scale-105 border border-slate-200 dark:border-slate-700"
             >
               {darkMode ? <Sun size={18} className="text-sunny-500" /> : <Moon size={18} className="text-slate-600" />}
